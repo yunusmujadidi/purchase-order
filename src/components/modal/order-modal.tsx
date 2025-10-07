@@ -86,7 +86,6 @@ export const OrderModal = () => {
               : "Fill in the form to create a new order"}
           </DialogDescription>
         </DialogHeader>
-        {/* Order Form */}
         <OrderForm onSubmit={onSubmit} defaultValues={defaultValues} />
         <DialogFooter>
           <Button disabled={isPending} variant="outline" onClick={onClose}>
@@ -95,7 +94,7 @@ export const OrderModal = () => {
           <Button disabled={isPending} form="order-form">
             {isPending ? (
               <>
-                <Loader2 className="animate-spin mr-2" />
+                <Loader2 className="animate-spin mr-2 h-4 w-4" />
                 {isEdit ? "Updating..." : "Creating..."}
               </>
             ) : isEdit ? (
