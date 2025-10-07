@@ -3,9 +3,13 @@ import { auth } from "./auth";
 async function main() {
   console.log("🌱 Seeding database...");
 
-  const email = process.env.ADMIN_EMAIL || "yunusmujadidi@gmail.com";
-  const password = "admin123";
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
   const username = "admin";
+
+  if (!email || !password) {
+    throw new Error();
+  }
 
   try {
     // Create superadmin using Better Auth
