@@ -2,19 +2,17 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const orderRouter = createTRPCRouter({
-  // Get all orders
   getAll: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.order.findMany({
       include: {
         createdBy: {
-          select: { username: true, email: true },
+          select: { name: true, email: true, role: true },
         },
       },
       orderBy: { createdAt: "desc" },
     });
   }),
 
-  // Get single order
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -24,54 +22,70 @@ export const orderRouter = createTRPCRouter({
       });
     }),
 
-  // Create order
   create: publicProcedure
     .input(
       z.object({
         clientName: z.string().min(1),
+        clientProject: z.string().optional(),
         productName: z.string().min(1),
         quantity: z.number().min(1),
-        materials: z.array(z.string()),
+        size: z.string().optional(),
+        description: z.string().optional(),
+        materials: z.array(z.string()).default([]),
         deliveryDate: z.date().optional(),
-        // ... add more fields
+        deliveryAddress: z.string().optional(),
+        notes: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Generate order number
       const count = await ctx.db.order.count();
       const orderNumber = `ORD-${new Date().getFullYear()}-${String(
         count + 1
       ).padStart(4, "0")}`;
 
+      // TODO: Get actual user from session
+      const admin = await ctx.db.user.findFirst({
+        where: { role: "SUPERADMIN" },
+      });
+
+      if (!admin) throw new Error("No admin user found");
+
       return ctx.db.order.create({
         data: {
           orderNumber,
           ...input,
-          createdById: "temp-user-id", // TODO: Get from session
+          createdById: admin.id,
         },
       });
     }),
 
-  // Update order
   update: publicProcedure
     .input(
       z.object({
         id: z.string(),
-        data: z.object({
-          clientName: z.string().optional(),
-          productName: z.string().optional(),
-          // ... more fields
-        }),
+        clientName: z.string().optional(),
+        clientProject: z.string().optional(),
+        productName: z.string().optional(),
+        quantity: z.number().optional(),
+        size: z.string().optional(),
+        description: z.string().optional(),
+        materials: z.array(z.string()).optional(),
+        deliveryDate: z.date().optional(),
+        deliveryAddress: z.string().optional(),
+        status: z
+          .enum(["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"])
+          .optional(),
+        notes: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
       return ctx.db.order.update({
-        where: { id: input.id },
-        data: input.data,
+        where: { id },
+        data,
       });
     }),
 
-  // Delete order
   delete: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
