@@ -91,45 +91,70 @@ enum UserRole {
 
 model Order {
   id          String @id @default(cuid())
-  orderNumber String @unique
+  orderNumber String @unique // Auto-generated: ORD-2025-0001
 
+  // CSV: NO, SW columns
+  rowNumber Int? // Original row number from CSV
+  swCode    String? // SW identifier from CSV
+
+  // CSV: Client, Qty, Picture, Size, Description
   clientName    String
-  clientProject String?
+  clientProject String? // Multiple orders can have same client with different project numbers
 
   productName String
   quantity    Int     @default(1)
   size        String?
-  description String?
-  pictureUrl  String?
+  description String? @db.Text // Allow longer descriptions
+  pictureRef  String? // Reference to picture (Picture column from CSV)
 
-  materials String[]
+  // Materials extracted from description
+  materials String[] // Array for easy filtering: ["Solid Wood", "Fabric", "Metal"]
 
+  // CSV: PO/APPROVAL GB, Delivery Date, Delivery Address
   poApprovalDate  DateTime?
   deliveryDate    DateTime?
   deliveryAddress String?
 
-  currentStage String      @default("PENDING")
+  // Status tracking
+  currentStage String      @default("PENDING") // PENDING, METAL, VENEER, ASSY, FINISHING, PACKING, COMPLETED
   status       OrderStatus @default(PENDING)
+  priority     Priority    @default(STANDARD)
 
-  metalIn      DateTime?
-  metalOut     DateTime?
-  veneerIn     DateTime?
-  veneerOut    DateTime?
-  assyIn       DateTime?
-  assyOut      DateTime?
+  // CSV: Process stages with IN/OUT dates
+  // METAL/SS
+  metalIn  DateTime?
+  metalOut DateTime?
+
+  // VENEER
+  veneerIn  DateTime?
+  veneerOut DateTime?
+
+  // ASSY/RANGKA
+  assyIn  DateTime?
+  assyOut DateTime?
+
+  // FINISHING
   finishingIn  DateTime?
   finishingOut DateTime?
-  packingIn    DateTime?
-  packingOut   DateTime?
 
-  notes String?
+  // PACKING
+  packingIn  DateTime?
+  packingOut DateTime?
 
+  // Additional fields
+  notes String? @db.Text
+
+  // Relations
   createdById String
   createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([clientName])
+  @@index([deliveryDate])
+  @@index([currentStage])
+  @@index([status])
   @@map("order")
 }
 
@@ -138,4 +163,11 @@ enum OrderStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+  ON_HOLD
+}
+
+enum Priority {
+  URGENT
+  STANDARD
+  LOW
 }

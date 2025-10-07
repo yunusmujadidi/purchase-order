@@ -34,8 +34,19 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
   const form = useForm<OrderFormValues>({
     resolver: zodResolver(orderFormSchema),
     defaultValues: {
-      quantity: 1,
-      ...defaultValues,
+      clientName: defaultValues?.clientName || "",
+      clientProject: defaultValues?.clientProject || "",
+      productName: defaultValues?.productName || "",
+      quantity: defaultValues?.quantity || 1,
+      size: defaultValues?.size || "",
+      description: defaultValues?.description || "",
+      pictureRef: defaultValues?.pictureRef || "",
+      materials: defaultValues?.materials || "",
+      poApprovalDate: defaultValues?.poApprovalDate || undefined,
+      deliveryDate: defaultValues?.deliveryDate || undefined,
+      deliveryAddress: defaultValues?.deliveryAddress || "",
+      priority: defaultValues?.priority || "STANDARD",
+      notes: defaultValues?.notes || "",
     },
   });
 
@@ -70,7 +81,11 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
               <FormItem>
                 <FormLabel>Client Name *</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Yophie" {...field} />
+                  <Input
+                    placeholder="e.g., Yophie"
+                    {...field}
+                    value={field.value || ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -84,7 +99,11 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
               <FormItem>
                 <FormLabel>Project/Reference</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Yophie 2" {...field} />
+                  <Input
+                    placeholder="e.g., Yophie 2"
+                    {...field}
+                    value={field.value || ""}
+                  />
                 </FormControl>
                 <FormDescription>Optional project identifier</FormDescription>
                 <FormMessage />
@@ -101,7 +120,11 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
             <FormItem>
               <FormLabel>Product Name *</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Custom Dining Table" {...field} />
+                <Input
+                  placeholder="e.g., Custom Dining Table"
+                  {...field}
+                  value={field.value || ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -120,7 +143,10 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
                     type="number"
                     min="1"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    value={field.value || 1}
+                    onChange={(e) =>
+                      field.onChange(parseInt(e.target.value) || 1)
+                    }
                   />
                 </FormControl>
                 <FormMessage />
@@ -135,7 +161,11 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
               <FormItem>
                 <FormLabel>Size/Dimensions</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., 240 x 120 x 75 cm" {...field} />
+                  <Input
+                    placeholder="e.g., 240 x 120 x 75 cm"
+                    {...field}
+                    value={field.value || ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -154,6 +184,7 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
                   placeholder="Material details, finishing, specifications..."
                   className="min-h-[100px]"
                   {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
@@ -161,28 +192,87 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="materials"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Materials</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="e.g., Solid Wood, Fabric, Metal (comma-separated)"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter materials separated by commas
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Delivery Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="materials"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Materials</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Solid Wood, Fabric, Metal"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormDescription>Comma-separated</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="pictureRef"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Picture Reference</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Picture, Photo reference"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                <FormDescription>Picture or photo reference</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Dates & Priority */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="poApprovalDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>PO/Approval Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="deliveryDate"
@@ -224,18 +314,44 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
 
           <FormField
             control={form.control}
-            name="deliveryAddress"
+            name="priority"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Delivery Address</FormLabel>
+                <FormLabel>Priority</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter address" {...field} />
+                  <select
+                    {...field}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="STANDARD">Standard</option>
+                    <option value="URGENT">Urgent</option>
+                    <option value="LOW">Low Priority</option>
+                  </select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
+        {/* Delivery Address */}
+        <FormField
+          control={form.control}
+          name="deliveryAddress"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Delivery Address</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter delivery address"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}
@@ -247,6 +363,7 @@ export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {
                 <Textarea
                   placeholder="Additional notes or special instructions..."
                   {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />

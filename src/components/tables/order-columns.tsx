@@ -18,22 +18,36 @@ import { toast } from "sonner";
 
 type Order = {
   id: string;
+  orderNumber: string;
   clientName: string;
   clientProject?: string | null;
   productName: string;
   quantity: number;
   size?: string | null;
   description?: string | null;
+  pictureRef?: string | null;
   materials?: string[];
+  poApprovalDate?: Date | null;
   deliveryDate?: Date | null;
   deliveryAddress?: string | null;
+  currentStage: string;
   status: string;
+  priority: string;
   notes?: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
 
 export const columns: ColumnDef<Order>[] = [
+  {
+    accessorKey: "orderNumber",
+    header: "Order #",
+    cell: ({ row }) => {
+      return (
+        <div className="font-mono text-xs">{row.getValue("orderNumber")}</div>
+      );
+    },
+  },
   {
     accessorKey: "clientName",
     header: ({ column }) => {
@@ -119,6 +133,31 @@ export const columns: ColumnDef<Order>[] = [
     },
   },
   {
+    accessorKey: "currentStage",
+    header: "Current Stage",
+    cell: ({ row }) => {
+      const stage = row.getValue("currentStage") as string;
+      const stageColors: Record<string, string> = {
+        PENDING: "bg-gray-100 text-gray-700",
+        METAL: "bg-slate-100 text-slate-800",
+        VENEER: "bg-amber-100 text-amber-800",
+        ASSY: "bg-orange-100 text-orange-800",
+        FINISHING: "bg-purple-100 text-purple-800",
+        PACKING: "bg-blue-100 text-blue-800",
+        COMPLETED: "bg-green-100 text-green-800",
+      };
+      return (
+        <span
+          className={`inline-block px-2 py-1 text-xs font-medium rounded ${
+            stageColors[stage] || "bg-gray-100 text-gray-700"
+          }`}
+        >
+          {stage}
+        </span>
+      );
+    },
+  },
+  {
     accessorKey: "deliveryDate",
     header: ({ column }) => {
       return (
@@ -133,7 +172,25 @@ export const columns: ColumnDef<Order>[] = [
     },
     cell: ({ row }) => {
       const date = row.getValue("deliveryDate") as Date | null;
-      return <div>{date ? format(new Date(date), "PPP") : "-"}</div>;
+      return <div>{date ? format(new Date(date), "dd MMM yyyy") : "-"}</div>;
+    },
+  },
+  {
+    accessorKey: "priority",
+    header: "Priority",
+    cell: ({ row }) => {
+      const priority = row.getValue("priority") as string;
+      const priorityConfig: Record<string, { color: string; icon: string }> = {
+        URGENT: { color: "text-red-600", icon: "🔥" },
+        STANDARD: { color: "text-gray-600", icon: "" },
+        LOW: { color: "text-blue-600", icon: "⬇️" },
+      };
+      const config = priorityConfig[priority] || priorityConfig.STANDARD;
+      return (
+        <div className={`text-xs font-medium ${config.color}`}>
+          {config.icon} {priority}
+        </div>
+      );
     },
   },
   {
@@ -146,6 +203,7 @@ export const columns: ColumnDef<Order>[] = [
         IN_PROGRESS: "bg-blue-100 text-blue-800",
         COMPLETED: "bg-green-100 text-green-800",
         CANCELLED: "bg-red-100 text-red-800",
+        ON_HOLD: "bg-orange-100 text-orange-800",
       };
       return (
         <span

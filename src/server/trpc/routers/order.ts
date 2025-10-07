@@ -31,9 +31,12 @@ export const orderRouter = createTRPCRouter({
         quantity: z.number().min(1),
         size: z.string().optional(),
         description: z.string().optional(),
+        pictureRef: z.string().optional(),
         materials: z.array(z.string()).default([]),
+        poApprovalDate: z.date().optional(),
         deliveryDate: z.date().optional(),
         deliveryAddress: z.string().optional(),
+        priority: z.enum(["URGENT", "STANDARD", "LOW"]).optional(),
         notes: z.string().optional(),
       })
     )
@@ -54,6 +57,7 @@ export const orderRouter = createTRPCRouter({
         data: {
           orderNumber,
           ...input,
+          priority: input.priority || "STANDARD",
           createdById: admin.id,
         },
       });
@@ -69,12 +73,16 @@ export const orderRouter = createTRPCRouter({
         quantity: z.number().optional(),
         size: z.string().optional(),
         description: z.string().optional(),
+        pictureRef: z.string().optional(),
         materials: z.array(z.string()).optional(),
+        poApprovalDate: z.date().optional(),
         deliveryDate: z.date().optional(),
         deliveryAddress: z.string().optional(),
+        currentStage: z.string().optional(),
         status: z
-          .enum(["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"])
+          .enum(["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED", "ON_HOLD"])
           .optional(),
+        priority: z.enum(["URGENT", "STANDARD", "LOW"]).optional(),
         notes: z.string().optional(),
       })
     )
