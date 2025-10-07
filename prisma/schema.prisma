@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// BETTER AUTH MODELS
+// ============================================
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Better Auth relations
+  sessions Session[]
+  accounts Account[]
+
+  // Your app fields
+  username String?  @unique
+  role     UserRole @default(WORKER)
+  isActive Boolean  @default(true)
+
+  // Order relations
+  createdOrders Order[] @relation("CreatedBy")
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String? // Better Auth stores hashed password here
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+enum UserRole {
+  SUPERADMIN
+  ADMIN
+  WORKER
+}
+
+// ============================================
+// ORDER MODEL
+// ============================================
+
+model Order {
+  id          String @id @default(cuid())
+  orderNumber String @unique
+
+  clientName    String
+  clientProject String?
+
+  productName String
+  quantity    Int     @default(1)
+  size        String?
+  description String?
+  pictureUrl  String?
+
+  materials String[]
+
+  poApprovalDate  DateTime?
+  deliveryDate    DateTime?
+  deliveryAddress String?
+
+  currentStage String      @default("PENDING")
+  status       OrderStatus @default(PENDING)
+
+  metalIn      DateTime?
+  metalOut     DateTime?
+  veneerIn     DateTime?
+  veneerOut    DateTime?
+  assyIn       DateTime?
+  assyOut      DateTime?
+  finishingIn  DateTime?
+  finishingOut DateTime?
+  packingIn    DateTime?
+  packingOut   DateTime?
+
+  notes String?
+
+  createdById String
+  createdBy   User   @relation("CreatedBy", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order")
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
