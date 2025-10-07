@@ -5,6 +5,8 @@ import { OrderModal } from "@/components/modal/order-modal";
 import { useOrderModal } from "@/hooks/use-order-modal";
 import { trpc } from "@/lib/trpc";
 import { Plus } from "lucide-react";
+import { DataTable } from "@/components/tables/data-table";
+import { columns } from "@/components/tables/order-columns";
 
 const OrdersPage = () => {
   const { onOpen } = useOrderModal();
@@ -25,43 +27,19 @@ const OrdersPage = () => {
         </Button>
       </div>
 
-      {/* Orders List */}
-      <div className="bg-white rounded-lg shadow">
-        {isLoading ? (
-          <div className="p-8 text-center text-muted-foreground">
-            Loading orders...
-          </div>
-        ) : orders && orders.length > 0 ? (
-          <div className="divide-y">
-            {orders.map((order) => (
-              <div key={order.id} className="p-4 hover:bg-gray-50">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold">{order.productName}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Client: {order.clientName}
-                      {order.clientProject && ` - ${order.clientProject}`}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Qty: {order.quantity}
-                      {order.size && ` | Size: ${order.size}`}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 text-center text-muted-foreground">
-            No orders yet. Click &quot;New Order&quot; to create one.
-          </div>
-        )}
-      </div>
+      {/* Orders Data Table */}
+      {isLoading ? (
+        <div className="p-8 text-center text-muted-foreground bg-white rounded-lg border">
+          Loading orders...
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={orders || []}
+          searchKey="clientName"
+          searchPlaceholder="Search by client name..."
+        />
+      )}
 
       <OrderModal />
     </div>
