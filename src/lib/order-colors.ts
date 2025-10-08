@@ -46,3 +46,17 @@ export const materialColors = {
   badge: "bg-blue-100 text-blue-800",
   item: "bg-blue-50 text-blue-800 hover:bg-blue-100",
 };
+
+// Helper function to get hex color for stages (for inline styles)
+export function getStageColor(stage: string): string {
+  const colorMap: Record<string, string> = {
+    PENDING: "#6b7280", // gray
+    METAL: "#475569", // slate
+    VENEER: "#d97706", // amber
+    ASSY: "#ea580c", // orange
+    FINISHING: "#9333ea", // purple
+    PACKING: "#2563eb", // blue
+    COMPLETED: "#16a34a", // green
+  };
+  return colorMap[stage] || "#6b7280"; // default to gray
+}

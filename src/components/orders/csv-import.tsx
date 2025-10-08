@@ -50,7 +50,7 @@ interface CSVRow {
 export function CSVImport() {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [preview, setPreview] = useState<any[]>([]);
+  const [preview, setPreview] = useState<CSVRow[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const importMutation = trpc.order.bulkImport.useMutation();
@@ -62,7 +62,7 @@ export function CSVImport() {
       setFile(selectedFile);
 
       // Parse CSV for preview
-      Papa.parse(selectedFile, {
+      Papa.parse<CSVRow>(selectedFile, {
         header: true,
         preview: 5, // Show first 5 rows
         complete: (results) => {
@@ -190,9 +190,11 @@ export function CSVImport() {
 
           // Refresh the orders list
           utils.order.getAll.invalidate();
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error("Import error:", error);
-          toast.error(error.message || "Failed to import orders");
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to import orders";
+          toast.error(errorMessage);
         } finally {
           setIsProcessing(false);
         }
@@ -257,7 +259,7 @@ export function CSVImport() {
                   </tr>
                 </thead>
                 <tbody>
-                  {preview.map((row: any, idx) => (
+                  {preview.map((row, idx) => (
                     <tr key={idx} className="border-t">
                       <td className="p-2">{row.Client || "-"}</td>
                       <td className="p-2">{row.Size || "-"}</td>

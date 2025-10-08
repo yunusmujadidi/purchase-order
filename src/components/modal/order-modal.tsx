@@ -3,7 +3,6 @@
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { z } from "zod";
 
 import {
   Dialog,
@@ -14,8 +13,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { OrderForm } from "@/components/forms/order-form";
-import { orderFormSchema } from "@/lib/zod-schema";
+import {
+  OrderForm,
+  type OrderFormSubmitValues,
+} from "@/components/forms/order-form";
 import { useOrderModal } from "@/hooks/use-order-modal";
 import { trpc } from "@/lib/trpc";
 
@@ -36,7 +37,7 @@ export const OrderModal = () => {
     },
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: OrderFormSubmitValues) => {
     startTransition(async () => {
       try {
         // Materials are already converted to array in OrderForm
@@ -51,8 +52,10 @@ export const OrderModal = () => {
           toast.success("Order created successfully");
         }
         onClose();
-      } catch (error: any) {
-        toast.error(error.message || "Something went wrong");
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Something went wrong";
+        toast.error(errorMessage);
       }
     });
   };

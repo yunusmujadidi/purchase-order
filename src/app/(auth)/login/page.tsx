@@ -9,14 +9,21 @@ import {
 
 const LoginPage = () => {
   return (
-    <div className="min-h-screen bg-secondary">
-      <div className="h-screen w-full flex flex-col items-center justify-center gap-10">
+    <div className="min-h-screen bg-secondary relative">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url(/login.png)" }}
+      />
+
+      {/* Content Overlay */}
+      <div className="h-screen w-full flex flex-col items-center justify-center gap-10 relative z-10">
         {/* Logo/Header */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2 text-primary">
           <h1 className="text-4xl font-bold tracking-tight">
             Order Tracking System
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-primary-foreground">
             Furniture Manufacturing Management
           </p>
         </div>

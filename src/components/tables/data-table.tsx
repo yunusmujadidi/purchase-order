@@ -77,7 +77,12 @@ export function DataTable<TData, TValue>({
 
   // Extract unique materials from data
   const allMaterials = Array.from(
-    new Set(data.flatMap((item: any) => item.materials || []))
+    new Set(
+      data.flatMap((item) => {
+        const record = item as Record<string, unknown>;
+        return (record.materials as string[]) || [];
+      })
+    )
   ).sort();
 
   const table = useReactTable({

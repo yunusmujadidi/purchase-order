@@ -25,9 +25,14 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 
+// Type for the submitted form data (after materials conversion)
+export type OrderFormSubmitValues = Omit<OrderFormValues, "materials"> & {
+  materials: string[];
+};
+
 interface OrderFormProps {
   defaultValues?: Partial<OrderFormValues>;
-  onSubmit: (values: any) => void;
+  onSubmit: (values: OrderFormSubmitValues) => void;
 }
 
 export function OrderForm({ defaultValues, onSubmit }: OrderFormProps) {

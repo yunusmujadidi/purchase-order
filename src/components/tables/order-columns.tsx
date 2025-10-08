@@ -20,7 +20,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   Select,
@@ -41,6 +40,7 @@ import {
   statusItemColors,
   priorityConfig,
 } from "@/lib/order-colors";
+import type { OrderStatus } from "@prisma/client";
 
 type Order = {
   id: string;
@@ -483,7 +483,7 @@ export const columns: ColumnDef<Order>[] = [
       const handleStatusChange = (newStatus: string) => {
         updateStatusMutation.mutate({
           id: order.id,
-          status: newStatus as any,
+          status: newStatus as OrderStatus,
         });
       };
 
@@ -543,15 +543,17 @@ export const columns: ColumnDef<Order>[] = [
           toast.success("Order deleted successfully");
           setShowDeleteDialog(false);
         },
-        onError: (error: any) => {
-          toast.error(error.message || "Failed to delete order");
+        onError: (error: unknown) => {
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to delete order";
+          toast.error(errorMessage);
         },
       });
 
       const handleDelete = async () => {
         try {
           await deleteMutation.mutateAsync({ id: order.id });
-        } catch (error) {
+        } catch {
           // Error is handled in onError
         }
       };

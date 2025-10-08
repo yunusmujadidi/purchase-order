@@ -56,13 +56,13 @@ export const LoginForm = () => {
             router.push("/");
             router.refresh();
           },
-          onError: (ctx) => {
+          onError: () => {
             setError("Invalid username/email or password");
             setIsLoading(false);
           },
         }
       );
-    } catch (err) {
+    } catch {
       setError("An error occurred during login");
       setIsLoading(false);
     }

@@ -29,12 +29,14 @@ async function main() {
     console.log("   Email:", email);
     console.log("   Username:", username);
     console.log("   Password:", password);
+    console.log("   Result:", result);
     console.log("");
     console.log("🎉 Seeding complete!");
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorObj = error as { message?: string; body?: { message?: string } };
     if (
-      error.message?.includes("already exists") ||
-      error.body?.message?.includes("exists")
+      errorObj.message?.includes("already exists") ||
+      errorObj.body?.message?.includes("exists")
     ) {
       console.log("⚠️  Superadmin already exists");
       console.log("   Email:", email);
